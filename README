@@ -1,0 +1,3 @@
+#### 一个golang 标准库 net/rpc的client端封装
+
+#####创建多个client，支持重连
