@@ -6,14 +6,16 @@ import (
 )
 
 
-var rpcClient *xrpc.Clients
-
-var CallTestRPC = "TEST.CallTestRPC"
+var (
+	rpcClient *xrpc.Clients
+	CallTestRPC = "TEST.CallTestRPC"
+	RPCPing = "TEST.Ping"
+)
 
 func main() {
 	network := "tcp"
 	addr := "localhost:1234"
-	options := xrpc.ClientOptions{
+	option := xrpc.ClientOptions{
 		Proto: network,
 		Addr:  addr,
 	}
@@ -21,12 +23,12 @@ func main() {
 	rpcClient := xrpc.Dials(rpcOptions)
 
 	// ping & reconnect
-	rpcClient.Ping(CometServicePing)
+	rpcClient.Ping(RPCPing)
 
 	arg := struct {}{}
 	reply := struct {}{}
 
-	err = rpcClient.Call(CallTestRPC, &arg, &reply)
+	err := rpcClient.Call(CallTestRPC, &arg, &reply)
 	if err != nil {
 		log.Error("rpcClient.Call(%s, %v, reply) error(%v)", CallTestRPC, arg, err)
 	}
