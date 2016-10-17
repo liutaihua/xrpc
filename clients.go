@@ -2,6 +2,7 @@ package xrpc
 
 import (
 	"errors"
+	"sync/atomic"
 )
 
 var (
@@ -10,6 +11,7 @@ var (
 
 type Clients struct {
 	clients []*Client
+	robinCount uint64
 }
 
 // Dials connects to RPC servers at the specified network address.
@@ -18,13 +20,20 @@ func Dials(options []ClientOptions) *Clients {
 	for _, op := range options {
 		clients.clients = append(clients.clients, Dial(op))
 	}
+	clients.robinCount = 0
 	return clients
 }
 
 // get get a available client.
 func (c *Clients) get() (*Client, error) {
-	for _, cli := range c.clients {
-		if cli != nil && cli.Client != nil && cli.Error() == nil {
+	//for _, cli := range c.clients {
+	//	if cli != nil && cli.Client != nil && cli.Error() == nil {
+	//		return cli, nil
+	//	}
+	//}
+	atomic.AddUint64(&c.robinCount, 1)
+	for i := 0; i < len(c.clients); i++ {
+		if cli := c.clients[c.robinCount % len(c.clients)]; cli != nil && cli.Client != nil && cli.Error() == nil {
 			return cli, nil
 		}
 	}
